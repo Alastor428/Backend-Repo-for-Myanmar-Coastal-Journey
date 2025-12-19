@@ -26,6 +26,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "moment": "^2.30.1",
     "mongoose": "^9.0.1",
@@ -41,6 +42,7 @@
   "devDependencies": {
     "@faker-js/faker": "^10.1.0",
     "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/date-fns": "^2.5.3",
     "@types/express": "^5.0.6",

@@ -56,7 +56,16 @@ NODE_ENV=development
 MONGO_URL=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/
 ```
 
-### 4. Run the app
+### 4. Seed Installation
+
+```env
+    Database => MongoDB
+    Adapter Package => schema-seed-adapter-mongodb
+    Install Command => npm install -D schema-seed-adapter-mongodb
+    Connection String Example => mongodb://localhost:27017/db
+```
+
+### 5. Run the app
 
 Development mode:
 

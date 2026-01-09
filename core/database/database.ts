@@ -7,11 +7,19 @@ import { ConnectionString, IConnectionDefaults } from 'connection-string';
  * Provides functionality for managing documents, collections in database.
  */
 export class Database {
- 
+  /**
+   * MongoDB database object
+   */
   db: Db;
 
+  /**
+   * MongoDB Client.
+   */
   client?: MongoClient;
 
+  /**
+   * Logger instance
+   */
   log: LogFn;
 
   /**
@@ -50,6 +58,9 @@ export class Database {
       .insertMany(documentsCopy, bulkWriteOptions);
   }
 
+  /**
+   * Drops database.
+   */
   async drop() {
     return this.db.dropDatabase();
   }
@@ -93,6 +104,9 @@ export class Database {
     return this.db.collection(collectionName).deleteMany({});
   }
 
+  /**
+   * Closes connection with database.
+   */
   async closeConnection() {
     this.log('Closing connection...');
     if (!this.client) {

@@ -35,6 +35,7 @@
     "moment": "^2.30.1",
     "mongo-seeding": "^4.0.2",
     "mongodb": "^7.0.0",
+    "mongoose": "^9.1.2",
     "nodemailer": "^7.0.11",
     "resend": "^6.6.0",
     "rimraf": "^6.1.2",

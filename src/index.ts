@@ -5,29 +5,26 @@ import express, { Request, Response } from 'express';
 import helmet from 'helmet';
 // import compression from 'compression';
 import http from 'http';
-import limiter from './lib/expressRateLimit';
 import connectdb from './database/connectdb';
+import authRouter from './routes/authRoute';
 dotenv.config();
 
 const app = express();
 
 const port = process.env.PORT || 3000;
 
-connectdb();
-console.log(process.env.MONGO_URI);
-app.use(cors()); 
-app.use(cookieParser());
+connectdb(); 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use(cookieParser());
 // app.use(compression());
 app.use(helmet()); // enhance security by setting various HTTP headers
-app.use(limiter); // apply rate limiting middleware
+
+// Routes
+app.use('/api/v1/auth', authRouter); //auth and user CRUD endpoints
 
 app.get('/', (_req: Request, res: Response) => {
-  // res.json(
-  //   {
-  //     message: 'API is running successfully!',
-  //   }
   res.send('API is running successfully!')
   
 });

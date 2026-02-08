@@ -7,6 +7,7 @@
     "start": "nodemon --exec babel-node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch --env-file=.env ./src/index.ts"
+    
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,7 @@
   },
   "homepage": "https://github.com/Alastor428/Backend-Repo-for-Myanmar-Coastal-Journey#readme",
   "dependencies": {
+    "@types/nodemailer": "^6.4.22",
     "bcrypt": "^6.0.0",
     "bson": "^7.0.0",
     "compression": "^1.8.1",
@@ -29,10 +31,12 @@
     "debug": "^4.4.3",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-async-handler": "^1.2.0",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "import-fresh": "^3.3.1",
     "jsonwebtoken": "^9.0.3",
+    "mailtrap": "^4.4.0",
     "moment": "^2.30.1",
     "mongo-seeding": "^4.0.2",
     "mongodb": "^7.0.0",
@@ -59,7 +63,6 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/moment": "^2.11.29",
     "@types/node": "^24.10.8",
-    "@types/nodemailer": "^7.0.4",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "@types/uuid": "^10.0.0",

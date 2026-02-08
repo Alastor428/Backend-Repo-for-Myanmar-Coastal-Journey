@@ -1,9 +1,29 @@
 
-import mongoose, { sanitizeFilter } from 'mongoose';
+import mongoose from 'mongoose';
 
 export enum USEROLES {
     Admin = 'Admin',
     Client = 'Client',
+}
+
+export interface IUser extends Document {
+  name: string;
+  email: string;
+  nrc: string;
+  dateOfBirth?: Date;
+  userRole: keyof typeof USEROLES | string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  // Auth & OTP
+  verifyToken?: string;
+  verifyTokenExpireAt?: Date;
+  isAccountVerified?: boolean;
+  resetPassword?: string;
+  resetPasswordExpireAt?: Date;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const userSchema = new mongoose.Schema({
@@ -18,11 +38,11 @@ const userSchema = new mongoose.Schema({
     },
     nrc: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     dateOfBirth: {
-        type: Date,
-        required: true
+        type: Date,  
     },
     userRole: {
         type: String,
@@ -37,63 +57,42 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    // Authentication
-    authentication: {
-        password: {
-            type: String,
-            required: true,
-            select: false
-        },
-        salt: {
-            type: String,
-            select: false
-        },
-        accessToken: {
-            type: String,
-            select: false
-        },
-        refreshToken: {
-            type: String,
-            select: false
-        },
-      
-    },
-    // OTP - Email Verification
-    verifyOtp: {
+    confirmPassword: {
         type: String,
-        default: ''
+        required: true,
     },
-    verifyOtpExpireAt: {
-        type: Number,
-        default: 0
+    //  Email Verification
+    verifyToken: {
+        type: String,
+    },
+    verifyTokenExpireAt: {
+        type: Date,
     },
     isAccountVerified: {
         type: Boolean,
         default: false
     },
-    resetOtp: {
+    resetPassword: {
         type: String,
-        default: ''
     },
-    resetOtpExpireAt: {
-        type: Number,
-        default: 0
+    resetPasswordExpireAt: {
+        type: Date,
     },
   },
    { timestamps: true }
 
 );
 
-export const UserModel = mongoose.model('User', userSchema);
+export const User = mongoose.model('User', userSchema);
 
-export const getUsers = () => UserModel.find();
-export const getUserByEmail = (email: string) => UserModel.findOne({ email });
-export const getUserBySessionToken = (sessionToken: string) => UserModel.findOne({
-    'authentication.sessionToken': sessionToken,
-})
-export const getUserById = (id: string) => UserModel.findById(id);
-export const createUser = (values: Record<string, any>) => new UserModel(values).save().then((user) => user.toObject());
-export const deleteUserById = (id: string) => UserModel.findOneAndDelete({ _id: id });
-export const updateUserById = (
-    id: string, 
-    values: Record<string, any>) => UserModel.findByIdAndUpdate(id, values);
+// export const getUsers = () => UserModel.find();
+// export const getUserByEmail = (email: string) => UserModel.findOne({ email });
+// export const getUserByRefreshToken = (refreshToken: string) => UserModel.findOne({
+//     'refreshToken': refreshToken,
+// })
+// export const getUserById = (id: string) => UserModel.findById(id);
+// export const createUser = (values: Record<string, any>) => new UserModel(values).save().then((user) => user.toObject());
+// export const deleteUserById = (id: string) => UserModel.findOneAndDelete({ _id: id });
+// export const updateUserById = (
+//     id: string, 
+//     values: Record<string, any>) => UserModel.findByIdAndUpdate(id, values);

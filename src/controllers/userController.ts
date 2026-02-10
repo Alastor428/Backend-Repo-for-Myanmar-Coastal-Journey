@@ -234,65 +234,59 @@ export const getUserById = asyncHandler(
     Get /api/v1/auth/users/refresh-token
     access Public - because access token has expired
 */
-export const refresh =  asyncHandler(
-    async (
-    req: Request,
-    res: Response
-) => {
-    const cookies = req.cookies
+export const refresh = asyncHandler(
+  async (req: Request, res: Response) => {
 
-    if(!cookies?.jwt){
-        res.status(401).json({
-            success: false,
-            status: 401,
-            message: 'Not Cookie Found. Unauthorized Error'
-        })
-        return;
+    const refreshToken = req.cookies?.jwt;
+
+    if (!refreshToken) {
+      res.status(401).json({
+        success: false,
+        message: 'No refresh token found'
+      });
+      return;
     }
 
-    let jwtRefreshToken;
-   if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
-    {
-        // get token from header
-        jwtRefreshToken = req.headers.authorization.split(' ')[1]
+    let decoded: JwtPayload;
 
-        if(!jwtRefreshToken) {
-            jwtRefreshToken = cookies.jwt 
-        } 
+    try {
+      decoded = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET as string
+      ) as JwtPayload;
+    } catch (error) {
+      res.status(403).json({
+        success: false,
+        message: 'Invalid or expired refresh token'
+      });
+      return;
+    }
 
-        const decoded = jwt.verify (
-            jwtRefreshToken,
-            process.env.REFRESH_TOKEN_SECRET as string,
-        ) as JwtPayload
+    const foundUser = await User.findById(decoded.id)
+      .select('-password -confirmPassword -verifyToken -resetPassword');
 
-        let foundUser = await User.findById(decoded.id).select('-password -confirmPassword -verifyToken -resetPassword');
+    if (!foundUser) {
+      res.status(401).json({
+        message: 'Unauthorized user'
+      });
+      return;
+    }
 
-        if(!foundUser){
-            res.status(401).json({
-                message: 'Unauthorized User'
-            })
-            return;
-        } else {
+    const accessToken = jwt.sign(
+      {
+        id: foundUser._id,
+        type: 'accessToken'
+      },
+      process.env.ACCESS_TOKEN_SECRET as string,
+      { expiresIn: '60s' }
+    );
 
-        const accessToken: string = jwt.sign(
-        {  
-            foundUser,
-            'Type': 'accessToken',
-         },
-        process.env.ACCESS_TOKEN_SECRET as string, 
-        { expiresIn: '60s'}
-        )
-
-        res.status(200).json({
-            message: 'token refresh again',
-            accessToken,
-        });
-        
-         }
-    } 
-}
-
-});
+    res.status(200).json({
+      message: 'Access token refreshed',
+      accessToken
+    });
+  }
+);
 
 
 // Genearate JWT

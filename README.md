@@ -76,14 +76,44 @@ npm run dev
 ## Development Status
 
 - ✅ Project setup and configuration
-- 🔁 Database schema design
-- 🔁 Error handling infrastructure
-- 🔁 Mongo Setup
-- 🔁 Authentication system (JWT + bcrypt)
-- 🔁 User management API (CRUD operations)
-- 🔁 Validation schemas (Zod)
-- 🔁 API documentation (Swagger)
-- 🔁 Rate limiting (login attempts)
+- ✅ Mongo Setup
+- ✅ User schema design
+- ✅ Authentication system (JWT + bcrypt)
+- ✅ Implemented user endpoints
+- ✅ User Validation schemas (Zod)
+- ✅ Rate limiting (login attempts)
+- 🔁 region, beach, restaurant schema design
+
+### ✅ **Implemented Endpoints**
+
+```
+#Authentication
+
+Register User
+POST http://localhost:3000/api/v1/auth/register
+
+Login User
+POST http://localhost:3000/api/v1/auth/login
+
+Logout User
+POST http://localhost:3000/api/v1/auth/logout
+
+Refresh Token
+POST http://localhost:3000/api/v1/auth/refresh-token
+
+#Show User
+
+Get All Users
+GET http://localhost:3000/api/v1/auth/users
+
+Get User (Param: Id)
+GET http://localhost:3000/api/v1/auth/users/:id
+
+#Coastal Part
+
+Create Region
+POST http://localhost:3000/api/v1/coastal/regions
+```
 
 ## License
 

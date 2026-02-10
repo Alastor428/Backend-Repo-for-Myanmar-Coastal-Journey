@@ -83,7 +83,7 @@ export const registerUser = asyncHandler(
             userRole,
             phone,
             password: hashedPassword,
-            // confirmPassword: hashedConfirmPassword,
+            confirmPassword: hashedConfirmPassword,
             verifyToken,
             verifyTokenExpireAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
            

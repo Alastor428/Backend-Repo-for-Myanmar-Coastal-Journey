@@ -1,9 +1,14 @@
-import { Decimal128, Timestamp } from 'bson';
 import mongoose from 'mongoose';
 
 export enum TicketTypes {
     Local = 'Local',
     Foreigner = 'Foreigner'
+}
+
+export enum PassengerTypes {
+    Group = 'Group',
+    Male = 'Male',
+    Female = 'Female'
 }
 
 const ticketSchema = new mongoose.Schema({
@@ -31,11 +36,24 @@ const ticketSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    Adult: {
-        type: 
+    noOfAdult: {
+        type: Number,
+        default: 1,
+        required: true
     },
     TicketType: {
         type: String,
         enum: Object.values(TicketTypes),
-        default: 
+        default: TicketTypes.Local
+    },
+    PassengerType: {
+        type: String,
+        enum: Object.values(PassengerTypes),
+        default: PassengerTypes.Male
     }
+   },
+   { timestamps: true },
+
+);
+
+export const Ticket = mongoose.model('Ticket', ticketSchema);

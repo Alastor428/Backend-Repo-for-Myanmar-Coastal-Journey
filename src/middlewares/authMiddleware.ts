@@ -7,7 +7,7 @@ interface JWTPayload {
     id: string;
 }
 
-export const verifyUserController = asyncHandler(
+export const authenticateToken = asyncHandler(
     async (
     req: Request,
     res: Response,

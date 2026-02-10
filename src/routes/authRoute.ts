@@ -8,8 +8,8 @@ import {
     getUserById,
 } from '../controllers/userController';
 import { limiter } from '../lib/expressRateLimit';
-import { verifyUserController } from '../middlewares/authMiddleware';
-import { authorizeRoles } from '../middlewares/roleMiddleware';
+import { authenticateToken } from '../middlewares/authMiddleware';
+// import { authorizeRoles } from '../middlewares/roleMiddleware';
 
 const authRouter = Router();
 
@@ -31,26 +31,26 @@ authRouter.post(
 
 authRouter.post(
     '/logout',
-    verifyUserController, 
+    authenticateToken, 
     logoutUser
 );
 
 authRouter.get(
     '/users', 
-    verifyUserController,
+    authenticateToken,
     getAllUser
 );
 
 authRouter.get(
     '/users/admin',
-    verifyUserController,
-    authorizeRoles('Admin'),
+    authenticateToken,
+    // authorizeRoles('Admin'),
     getAllUser
 );
 
 authRouter.get(
     '/users/:id', 
-    verifyUserController, 
+    authenticateToken, 
     getUserById
 );
 

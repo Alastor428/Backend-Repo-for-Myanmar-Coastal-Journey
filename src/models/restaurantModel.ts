@@ -1,16 +1,30 @@
 import mongoose from 'mongoose';
 
+export interface IRestaurant {
+    restaurantName: string;
+    region: mongoose.Schema.Types.ObjectId;
+    beach: mongoose.Schema.Types.ObjectId;
+    phone: string;
+}
 const restaurantSchema = new mongoose.Schema({
     restaurantName: {
         type: String,
         required: true
     },
-    restaurantLocation: {
-        type: String,
+    region: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Region',
         required: true
     },
-    // to connect with food document
-    // to connect with region document
+    beach: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Beach',
+        required: true
+    },
+    phone: {
+        type: String,
+        required: true
+    }
    },
    { timestamps: true }
 );

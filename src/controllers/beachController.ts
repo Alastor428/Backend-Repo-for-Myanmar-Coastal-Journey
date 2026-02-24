@@ -5,7 +5,6 @@ import { Region } from '../models/regionModel';
 
 /*
     Create new Region
-    Post /api/v1/regions
 */
 export const createRegion = asyncHandler(
     async (
@@ -51,16 +50,15 @@ export const createRegion = asyncHandler(
 
 /*
     Create new beach
-    Post /api/v1/beaches
 */
 export const createBeach = asyncHandler(
     async (
     req: Request,
     res: Response,
 ) => {
-        const { beachName, region, currentSafe, beachLocation, imageUrl } = req.body;
+        const { beachName, region, currentSafe, imageUrl } = req.body;
         
-        if(!beachName || !region || !currentSafe || !beachLocation || !imageUrl ) {
+        if(!beachName || !region || !currentSafe || !imageUrl ) {
             res.status(400).json({
                 success: false,
                 status: 400,
@@ -73,7 +71,6 @@ export const createBeach = asyncHandler(
             beachName,
             region,
             currentSafe,
-            beachLocation,
             imageUrl,
         })
 
@@ -87,4 +84,61 @@ export const createBeach = asyncHandler(
             data: beach
         })
 });
+
+
+/*
+    Get all beaches
+*/
+export const getAllBeach = asyncHandler(
+    async (
+    req: Request,
+    res: Response,
+) => {
+       const allBeachData = await Beach.find().populate('region','regionName').sort({beachName: 1});
+
+       if(!allBeachData || allBeachData.length === 0) {
+            res.status(400)
+            throw new Error('Beach Data Not Found');
+       } 
     
+        res.status(200).json({
+            success: true,
+            status: 200,
+            message: 'Beach Displayed',
+            data: allBeachData,
+        })
+});
+
+
+/*
+    Handle image upload
+*/
+
+export const imageUploadController = asyncHandler(
+    async (
+    req: Request,
+    res: Response,
+) => {
+
+        const files = req.files as Express.Multer.File[];
+
+        if(!files || files.length === 0) {    
+            res.status(400).json({
+                success: false,
+                status: 400,
+                message: 'No image uploaded'
+            })
+            return;
+        }
+
+        const imageUrls = files.map(file => `http://localhost:3000/uploads/${file.filename}`);
+
+        res.status(201).json({
+            success: true,
+            status: 201,
+            message: 'Images Created',
+            data: imageUrls,
+        });
+});
+
+

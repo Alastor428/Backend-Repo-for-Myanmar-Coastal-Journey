@@ -41,12 +41,12 @@ authRouter.get(
     getAllUser
 );
 
-authRouter.get(
-    '/users/admin',
-    authenticateToken,
-    // authorizeRoles('Admin'),
-    getAllUser
-);
+// authRouter.get(
+//     '/users/admin',
+//     authenticateToken,
+//     // authorizeRoles('Admin'),
+//     getAllUser
+// );
 
 authRouter.get(
     '/users/:id', 

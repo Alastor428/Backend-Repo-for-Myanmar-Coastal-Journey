@@ -40,14 +40,14 @@ export const CreateUserSchema = z.object({
     .string()
     .min(8, 'Password must be at least 8 characters'),
   dateOfBirth: z
-  .coerce.date()
-  .optional(),
+    .coerce.date()
+    .optional(),
   userRole: z
     .enum(USEROLES, "Role must be one of 'Admin' or 'Client' ")
     .default(USEROLES.Client),
   phone: z
     .string()
-    .min(9, 'Phone Numbers must be at least 9 characters')
+    .min(7, 'Phone Numbers must be at least 7 characters')
     .refine(val => val.startsWith('09'), {
       message: 'Phone number must start with 09'
     })

@@ -1,42 +1,51 @@
-import mongoose from 'mongoose';
+import mongoose, { Date } from 'mongoose';
 
 export enum TicketTypes {
     Local = 'Local',
     Foreigner = 'Foreigner'
 }
 
-export enum PassengerTypes {
-    Group = 'Group',
-    Male = 'Male',
-    Female = 'Female'
+export interface IBusTicket {
+    ticketName: string;
+    busId: mongoose.Schema.Types.ObjectId;
+    source: string;
+    destination: string;
+    departDate: Date;
+    departTime: Date;
+    ticketPrice: number;
+    noOfPassenger: number;
+    TicketType: TicketTypes;
 }
-
-const ticketSchema = new mongoose.Schema({
+const busTicketSchema = new mongoose.Schema({
     ticketName: {
         type: String,
+    },
+    busId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Bus',
         required: true
     },
-    from: {
+    source: {
         type: String,
         required: true
     },
-    to: {
+    destination: {
         type: String,
         required: true
     },
-    departDate: {
+    departureTime: {
         type: Date,
         required: true
     },
-    departTime: {
-        type: String,
+    ArrivalTime: {
+        type: Date,
         required: true
     },
     ticketPrice: {
         type: Number,
         required: true
     },
-    noOfAdult: {
+    noOfPassenger: {
         type: Number,
         default: 1,
         required: true
@@ -45,15 +54,10 @@ const ticketSchema = new mongoose.Schema({
         type: String,
         enum: Object.values(TicketTypes),
         default: TicketTypes.Local
-    },
-    PassengerType: {
-        type: String,
-        enum: Object.values(PassengerTypes),
-        default: PassengerTypes.Male
-    }
+    }, 
    },
    { timestamps: true },
 
 );
 
-export const Ticket = mongoose.model('Ticket', ticketSchema);
+export const Ticket = mongoose.model('Ticket', busTicketSchema);

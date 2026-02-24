@@ -7,7 +7,6 @@
     "start": "nodemon --exec babel-node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch --env-file=.env ./src/index.ts"
-    
   },
   "repository": {
     "type": "git",
@@ -20,6 +19,7 @@
   },
   "homepage": "https://github.com/Alastor428/Backend-Repo-for-Myanmar-Coastal-Journey#readme",
   "dependencies": {
+    "@types/multer": "^2.0.0",
     "@types/nodemailer": "^6.4.22",
     "bcrypt": "^6.0.0",
     "bson": "^7.0.0",
@@ -41,6 +41,7 @@
     "mongo-seeding": "^4.0.2",
     "mongodb": "^7.0.0",
     "mongoose": "^9.1.2",
+    "multer": "^2.0.2",
     "nodemailer": "^7.0.11",
     "resend": "^6.6.0",
     "rimraf": "^6.1.2",

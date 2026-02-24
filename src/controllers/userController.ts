@@ -6,18 +6,7 @@ import bcrypt from 'bcrypt';
 import asyncHandler from 'express-async-handler';
 import { User } from '../models/userModel';
 import { mailtrapClient, mailtrapSender } from '../../mailtrap/mailTrapConfig';
-import { CreateUserSchema } from '../validations/authSchema'
-
-// {
-//     "name":"Than Thar",
-//     "email":"ThanThar445@gmail.com", 
-//     "nrc": "9/PAKAKHA(N)992113",
-//     "dateOfBirth": "2005-04-24",
-//     "userRole": "Client",
-//     "phone": "09792117535",
-//     "password": "Than123",
-//     "status":"active"
-// }
+import { CreateUserSchema, LogInSchema } from '../validations/authSchema'
 
 /*
     Register new user
@@ -59,7 +48,7 @@ export const registerUser = asyncHandler(
         if(!parsedPayload.success) {
             res.status(422).json({
                 success: false,
-                status: 400,
+                status: 422,
                 message: "Invalid Credentials",
                 errors: parsedPayload.error.flatten(),
             });
@@ -146,7 +135,10 @@ export const loginUser = asyncHandler(
     req: Request,
     res: Response
 ) => {
-        const { name, email, password } = req.body
+        const { name, email, password } = req.body;
+        const loginPayload = req.body;
+
+        const parsedPayload = LogInSchema.safeParse(loginPayload);
 
         if(!name || !password) {
             res.status(400).json({
@@ -156,6 +148,16 @@ export const loginUser = asyncHandler(
         
         //check for user email
         const user = await User.findOne({ email })
+        
+        if(!parsedPayload.success){
+             res.status(422).json({
+                success: false,
+                status: 422,
+                message: "Invalid Credentials",
+                errors: parsedPayload.error.flatten(),
+            });``
+            return;
+        }
 
         if(user && (await bcrypt.compare(password, user.password))){
             res.json({
@@ -200,7 +202,8 @@ export const getAllUser = asyncHandler(
         res.status(200).json({
             success: true,
             status: 200,
-            UserData: allUserData,
+            message: 'User Displayed',
+            data: allUserData,
         })
 
 });
@@ -217,12 +220,14 @@ export const getUserById = asyncHandler(
         const id = req.params.id;
         const ExistedUser = await User.findById(id);
         if (!ExistedUser) {
-            res.status(403);
-            throw new Error('Invalid UserId. Wrong Parameter Passed')
+            res.status(403)
+            throw new Error("Invalid UserId. Wrong Parameter Passed")
         }else {
-                res.status(200).json({ 
-            message: "User Data Displayed",
-            GetUser: ExistedUser,
+            res.status(200).json({ 
+                success: true,
+                status: 200,
+                message: "User Data Displayed",
+                data: ExistedUser,
          });
         }
         
@@ -278,7 +283,7 @@ export const refresh = asyncHandler(
         type: 'accessToken'
       },
       process.env.ACCESS_TOKEN_SECRET as string,
-      { expiresIn: '60s' }
+      { expiresIn: '25min' }
     );
 
     res.status(200).json({
@@ -297,7 +302,7 @@ export const generateToken = (res: Response, id: string) => {
             'Type': 'accessToken',
          },
         process.env.ACCESS_TOKEN_SECRET as string, 
-        { expiresIn: '60s'}
+        { expiresIn: '25min'}
     )
 
     const refreshToken = jwt.sign(

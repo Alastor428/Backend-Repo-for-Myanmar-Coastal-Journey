@@ -56,7 +56,7 @@ export const getAllRestaurants = asyncHandler(
         .sort({restaurantName: 1});
 
         if(!allRestaurantData || allRestaurantData.length === 0) {
-            res.status(400)
+            res.status(404)
             throw new Error('Restaurant Data Not Found');
         }
 

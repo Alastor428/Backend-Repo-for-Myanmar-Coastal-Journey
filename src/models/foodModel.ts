@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
 
 export interface Ifood {
-    restaurant: mongoose.Schema.Types.ObjectId;
+    restaurant: mongoose.Types.ObjectId;
     foodName: string;
     foodPrice: number;
+
 }
-const foodSchema = new mongoose.Schema({
+const foodSchema = new mongoose.Schema<Ifood>({
     restaurant: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Restaurant',
@@ -20,7 +21,6 @@ const foodSchema = new mongoose.Schema({
         required: true
     },
    },
-   { timestamps: true }
 
 );
 

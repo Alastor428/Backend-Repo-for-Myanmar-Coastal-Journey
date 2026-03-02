@@ -6,7 +6,7 @@ export interface IRestaurant {
     beach: mongoose.Schema.Types.ObjectId;
     phone: string;
 }
-const restaurantSchema = new mongoose.Schema({
+const restaurantSchema = new mongoose.Schema<IRestaurant>({
     restaurantName: {
         type: String,
         required: true

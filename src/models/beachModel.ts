@@ -8,7 +8,7 @@ export interface IBeach {
     createdAt?: Date;
     updatedAt?: Date;
 }
-const beachSchema = new mongoose.Schema({
+const beachSchema = new mongoose.Schema<IBeach>({
     beachName: {
         type: String,
         required: true

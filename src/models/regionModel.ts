@@ -6,7 +6,7 @@ export interface IRegion extends Document {
     updatedAt?: Date;
 }
 
-const regionSchema = new mongoose.Schema({
+const regionSchema = new mongoose.Schema<IRegion>({
     regionName: {
         type: String,
         required: true

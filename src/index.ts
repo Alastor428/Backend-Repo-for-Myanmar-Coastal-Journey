@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import express, { Request, Response } from 'express';
 import helmet from 'helmet';
+import * as path from 'path';
 // import compression from 'compression';
 import http from 'http';
 import connectdb from './database/connectdb';
@@ -10,7 +11,11 @@ import authRouter from './routes/authRoute';
 import beachRouter from './routes/beachRoute';
 import restaurantRouter from './routes/restaurantRoute';
 import foodRouter from './routes/foodRoute';
-import * as path from 'path';
+import cityRouter from './routes/cityRoute';
+import routesRouter from './routes/routesRoute';
+import busRouter from './routes/busRoute';
+import ticketRouter from './routes/ticketRoute';
+
 dotenv.config();
 
 const app = express();
@@ -28,8 +33,12 @@ app.use(helmet()); // enhance security by setting various HTTP headers
 // Routes
 app.use('/api/v1/auth', authRouter); //auth and user CRUD endpoints
 app.use('/api/v1/beaches', beachRouter); //region, beachCRUD endpoints
-app.use('/api/v1/restaurants', restaurantRouter); //restaurant CRUD endpoints
-app.use('/api/v1/foods',foodRouter);
+app.use('/api/v1/restaurants', restaurantRouter); //restaurant endpoints
+app.use('/api/v1/foods',foodRouter); //food endpoints
+app.use('/api/v1/cities',cityRouter); //city endpoints
+app.use('/api/v1/buses',busRouter); //bus endpoints
+app.use('/api/v1/routes',routesRouter); //route endpoints
+app.use('/api/v1/tickets',ticketRouter); //ticket endpoints
 
 
 //serve static files from uploads and assets dir

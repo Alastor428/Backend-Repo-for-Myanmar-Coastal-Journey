@@ -1,22 +1,19 @@
 import mongoose, { Date } from 'mongoose';
 
-export enum TicketTypes {
-    Local = 'Local',
-    Foreigner = 'Foreigner'
-}
-
 export interface IBusTicket {
     ticketName: string;
     busId: mongoose.Schema.Types.ObjectId;
     source: string;
     destination: string;
-    departDate: Date;
-    departTime: Date;
+    departureDate: Date;
     ticketPrice: number;
     noOfPassenger: number;
-    TicketType: TicketTypes;
+    isForeigner: boolean;
+
+    createdAt?: Date;
+    updatedAt?: Date;
 }
-const busTicketSchema = new mongoose.Schema({
+const busTicketSchema = new mongoose.Schema<IBusTicket>({
     ticketName: {
         type: String,
     },
@@ -33,14 +30,11 @@ const busTicketSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    departureTime: {
+    departureDate: {
         type: Date,
         required: true
     },
-    ArrivalTime: {
-        type: Date,
-        required: true
-    },
+
     ticketPrice: {
         type: Number,
         required: true
@@ -50,11 +44,11 @@ const busTicketSchema = new mongoose.Schema({
         default: 1,
         required: true
     },
-    TicketType: {
-        type: String,
-        enum: Object.values(TicketTypes),
-        default: TicketTypes.Local
-    }, 
+    isForeigner: {
+        type: Boolean,
+        default: false,
+        required: true
+    }
    },
    { timestamps: true },
 

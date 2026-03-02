@@ -6,7 +6,7 @@ export enum USEROLES {
     Client = 'Client',
 }
 
-export interface IUser extends Document {
+export interface IUser {
   name: string;
   email: string;
   nrc: string;

@@ -94,16 +94,17 @@ export const getAllBeach = asyncHandler(
     req: Request,
     res: Response,
 ) => {
-       const allBeachData = await Beach.find().populate('region','regionName').sort({beachName: 1});
+       const allBeachData = await Beach.find().populate('region','regionName').sort({beachName: 1}).select(' -createdAt -updatedAt -__v');
 
        if(!allBeachData || allBeachData.length === 0) {
-            res.status(400)
+            res.status(404)
             throw new Error('Beach Data Not Found');
        } 
     
         res.status(200).json({
             success: true,
             status: 200,
+            count: allBeachData.length,
             message: 'Beach Displayed',
             data: allBeachData,
         })

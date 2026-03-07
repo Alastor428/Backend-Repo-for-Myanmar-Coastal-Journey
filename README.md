@@ -2,6 +2,12 @@
 
 a backend repository for the Myanmar Coastal Journey mobile app for special project of MIIT Students in 2025-2026 academic year
 
+## Tech stack
+
+- **Runtime:** Node.js
+- **Framework:** Express (TypeScript)
+- **Database:** MongoDB Atlas (Mongoose)
+
 ## Project Description
 
 Myanmar Coastal Journey delivers a rich set of features that help users explore Myanmar’s beaches effectively. Each beach page includes location details, cultural background, scenic highlights, photo galleries, recommended activities, and travel tips. The food and souvenirs section highlights local dishes, snacks, specialties, handmade products, and shop information.
@@ -53,10 +59,27 @@ Default environment variables:
 ```env
 PORT=3000
 NODE_ENV=development
-MONGO_URL=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/<dbname>?retryWrites=true&w=majority
 ```
 
-### 4. Seed Installation
+Set `MONGO_URI` in `.env` to your MongoDB Atlas connection string.
+
+### 4. Build and run
+
+Development (watch mode with tsx):
+
+```bash
+npm run dev
+```
+
+Production (compile then run):
+
+```bash
+npm run build
+npm start
+```
+
+### 5. Seed Installation
 
 ```env
     Database => MongoDB
@@ -65,26 +88,32 @@ MONGO_URL=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/
     Connection String Example => mongodb://localhost:27017/db
 ```
 
-### 5. Run the app
-
-Development mode:
-
-```bash
-npm run dev
-```
-
 ## Development Status
 
 - ✅ Project setup and configuration
-- ✅ Mongo Setup
+- ✅ Mongo Setup (MongoDB Atlas + Mongoose)
+- ✅ TypeScript build and scripts (tsc, dev, start)
 - ✅ User schema design
 - ✅ Authentication system (JWT + bcrypt)
-- ✅ Implemented user endpoints
-- ✅ User Validation schemas (Zod)
-- ✅ Rate limiting (login attempts)
-- 🔁 region, beach, restaurant schema design
+- ✅ User endpoints (register, login, logout, refresh-token, list users, get user by id)
+- ✅ User validation schemas (Zod)
+- ✅ Rate limiting (login/register attempts)
+- ✅ Region, beach, restaurant schema design and endpoints
+- ✅ City schema and endpoints (list, create)
+- ✅ Food schema and endpoints (list by restaurant, filter by restaurant name, create)
+- ✅ Travel route schema and endpoints (list, create)
+- ✅ Bus schema and endpoints (list, filter by departure time, filter by source/destination, create)
+- ✅ Ticket schema and endpoints (list, filter by source/destination, get by id, create)
+- ✅ Bus seat show schema and endpoints (get by id, create show, update seat status)
+- ✅ Validation middleware and Zod schemas for all data endpoints
+- ✅ Services layer (beach, restaurant, city, food, route, bus, ticket, bus show)
+- ✅ Image upload (beach images, multer)
+- ✅ API documentation (API.md)
+- 🔁 Role-based access (roleMiddleware present; not yet enforced on all routes)
 
 ### ✅ **Implemented Endpoints**
+
+For full API reference (Data | Endpoint | Notes) for the frontend team, see **[API.md](API.md)**.
 
 ```
 #Authentication

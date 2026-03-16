@@ -1,75 +1,61 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
-import { Route } from '../models/routeModel';
+import {
+  createRouteService,
+  getAllRoutesService,
+  getRouteByIdService,
+  updateRouteService,
+  deleteRouteService,
+} from '../services/routeService';
+import { parsePagination } from '../validations/commonSchema';
 
-/*
-    create new route
-*/
-
-export const createRoute = asyncHandler(
-    async (
-    req: Request,
-    res: Response,
-) => {
-    const { source, destination, duration, distance } = req.body
-
-    if(!source || !destination || !duration || !distance) {
-        res.status(400).json({
-            success: false,
-            status: 400,
-            message: "source, destination, duration, distance fields are required"
-        });
-    }
-
-    //create restaurant
-    const route = new Route({
-        source,
-        destination,
-        duration,
-        distance,
-    })
-
-    const savedRoute = await route.save();
-    console.log('This route saved in db', savedRoute);
-
-    res.status(201).json({
-            success: true,
-            status: 201,
-            message: 'Route Created Successfully',
-            data: route
-        })
+export const createRoute = asyncHandler(async (req: Request, res: Response) => {
+  const savedRoute = await createRouteService(req.body);
+  res.status(201).json({
+    success: true,
+    status: 201,
+    message: 'Route Created Successfully',
+    data: savedRoute,
+  });
 });
 
+export const getAllRoute = asyncHandler(async (req: Request, res: Response) => {
+  const pagination = parsePagination(req.query);
+  const result = await getAllRoutesService(pagination);
 
-/*
-    Get all routes
-*/
-export const getAllRoute = asyncHandler(
-    async (
-    req: Request,
-    res: Response,
-) => {
-       const allRouteData = await Route.find()
-       .populate({
-         path: 'source',
-         select: 'cityName'
-       })
-       .populate({
-          path: 'destination',
-          select: 'beachName'
-       })
-       .sort({source: 1, destination: 1})
-       .select('-createdAt -updatedAt -__v');
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Route Displayed',
+    ...result,
+  });
+});
 
-       if(!allRouteData || allRouteData.length === 0) {
-            res.status(404)
-            throw new Error('Route Data Not Found');
-       } 
-    
-        res.status(200).json({
-            success: true,
-            status: 200,
-            message: 'Route Displayed',
-            data: allRouteData,
-        })
+export const getRouteById = asyncHandler(async (req: Request, res: Response) => {
+  const route = await getRouteByIdService(req.params.id);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Route Displayed',
+    data: route,
+  });
+});
+
+export const updateRoute = asyncHandler(async (req: Request, res: Response) => {
+  const route = await updateRouteService(req.params.id, req.body);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Route Updated Successfully',
+    data: route,
+  });
+});
+
+export const deleteRoute = asyncHandler(async (req: Request, res: Response) => {
+  await deleteRouteService(req.params.id);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Route Deleted Successfully',
+  });
 });

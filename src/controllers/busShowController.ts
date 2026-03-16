@@ -1,96 +1,69 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
-import { seatStatus, Show } from '../models/busBookingShowModel';
-import { generateSeatLayout } from '../lib/busSeatIndex';
-import { Bus } from '../models/busModel';
-import { Ticket } from '../models/busTicketModel';
-import { updateSeatService } from '../services/busShowService'
+import {
+  createBusShowService,
+  getBusShowByIdService,
+  updateSeatService,
+  updateBusShowService,
+  deleteBusShowService,
+} from '../services/busShowService';
+import { seatStatus } from '../models/busBookingShowModel';
 
-/*
-   Create bus show
-*/
-
-export const createBusShow = asyncHandler(
-  async (
-    req: Request,
-    res: Response
-  ) => {
-    const { ticket, busId, departureTime } = req.body;
-
-    //Validate ticket
-    const targetTicket = await Ticket.findById(ticket);
-    if (!targetTicket) {
-      res.status(404);
-      throw new Error("Ticket not found");
-    }
-
-    // Validate bus
-    const targetBus = await Bus.findById(busId);
-    if (!targetBus) {
-      res.status(404);
-      throw new Error("Bus not found");
-    }
-
-    // Generate seat layout using ticket price
-    const seatLayout = generateSeatLayout(targetTicket.ticketPrice);
-
-     const newShow = await Show.create({
-      bus: targetBus._id,
-      ticket: targetTicket._id,
-      departureTime: departureTime || targetBus.departureTime,
-      price: targetTicket.ticketPrice,
-      seatLayout: seatLayout, // dynamic seat layout
-    });
-
-    res.status(201).json({
-      success: true,
-      status: 201,
-      message: "Seaat show created successfully",
-      data: newShow,
-    });
-  }
-);
-
-/*
-  Update seat status
-*/
-export const updateSeatStatus = asyncHandler(
-    async (
-    req: Request,
-    res: Response
-  )  => {
-      const { showId, row, seatNumber, status } = req.query;
-
-      const updatedShow = await updateSeatService(showId as string, row as string, seatNumber as string, status as seatStatus);
-
-      res.status(200).json({
-        success: true,
-        status: 200,
-        message: "Seat show updated successfully",
-        data: updatedShow,
-      })
+export const createBusShow = asyncHandler(async (req: Request, res: Response) => {
+  const newShow = await createBusShowService(req.body);
+  res.status(201).json({
+    success: true,
+    status: 201,
+    message: 'Seat show created successfully',
+    data: newShow,
+  });
 });
 
-/*
-  Get bus show by id
-*/
+export const getBusShowById = asyncHandler(async (req: Request, res: Response) => {
+  const show = await getBusShowByIdService(req.params.id);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Bus Seat Show Displayed',
+    data: show,
+  });
+});
 
-export const getBusShowById = asyncHandler(
-    async (
-    req: Request,
-    res: Response
-) => {
-        const id = req.params.id;
-        const ExistedBusShow = await Show.findById(id);
-        if (!ExistedBusShow) {
-            res.status(403)
-            throw new Error("Invalid Bus ShowId. Wrong Parameter Passed")
-        }else {
-            res.status(200).json({ 
-                success: true,
-                status: 200,
-                message: "Bus Seat Show Displayed",
-                data: ExistedBusShow,
-         });
-        }
+export const updateSeatStatus = asyncHandler(async (req: Request, res: Response) => {
+  const { showId } = req.params as { showId: string };
+  const { row, seatNumber, status } = req.query as { row: string; seatNumber: string; status: string };
+
+  const statusMap: Record<string, seatStatus> = {
+    Available: seatStatus.Available,
+    Selected: seatStatus.Selected,
+    Unavailable: seatStatus.Unavailable,
+  };
+  const seatStatusValue = statusMap[status] ?? seatStatus.Available;
+  const updatedShow = await updateSeatService(showId, row, seatNumber, seatStatusValue);
+
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Seat show updated successfully',
+    data: updatedShow,
+  });
+});
+
+export const updateBusShow = asyncHandler(async (req: Request, res: Response) => {
+  const show = await updateBusShowService(req.params.id, req.body);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Bus Show Updated Successfully',
+    data: show,
+  });
+});
+
+export const deleteBusShow = asyncHandler(async (req: Request, res: Response) => {
+  await deleteBusShowService(req.params.id);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Bus Show Deleted Successfully',
+  });
 });

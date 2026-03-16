@@ -9,7 +9,9 @@ export enum USEROLES {
 export interface IUser {
   name: string;
   email: string;
-  nrc: string;
+  isForeigner: boolean;
+  nrc?: string;        // Required for local users (Myanmar citizens)
+  passport?: string;   // Required for foreign users
   dateOfBirth?: Date;
   userRole: keyof typeof USEROLES | string;
   phone: string;
@@ -36,13 +38,24 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    isForeigner: {
+        type: Boolean,
+        default: false,
+        required: true
+    },
     nrc: {
         type: String,
-        required: true,
-        unique: true
+        sparse: true,
+        unique: true,  // unique when provided (local users only)
+    },
+    passport: {
+        type: String,
+        sparse: true,
+        unique: true,  // unique when provided (foreign users only)
     },
     dateOfBirth: {
-        type: Date,  
+        type: Date,
+        // Required at registration (Zod). Optional in DB for legacy users.
     },
     userRole: {
         type: String,

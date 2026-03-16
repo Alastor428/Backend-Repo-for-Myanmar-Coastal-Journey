@@ -19,40 +19,40 @@ import busSeatShowRouter from './routes/busSeatShowRoute';
 
 dotenv.config();
 
+
 const app = express();
 
 const port = process.env.PORT || 3000;
 
-connectdb(); 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(cookieParser());
-// app.use(compression());
-app.use(helmet()); // enhance security by setting various HTTP headers
+app.use(helmet());
 
 // Routes
-app.use('/api/v1/auth', authRouter); //auth and user CRUD endpoints
-app.use('/api/v1/beaches', beachRouter); //region, beachCRUD endpoints
-app.use('/api/v1/restaurants', restaurantRouter); //restaurant endpoints
-app.use('/api/v1/foods',foodRouter); //food endpoints
-app.use('/api/v1/cities',cityRouter); //city endpoints
-app.use('/api/v1/buses',busRouter); //bus endpoints
-app.use('/api/v1/routes',routesRouter); //route endpoints
-app.use('/api/v1/tickets',ticketRouter); //ticket endpoints
-app.use('/api/v1/bus-seats', busSeatShowRouter); //bus seat endpoints
+app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/beaches', beachRouter);
+app.use('/api/v1/restaurants', restaurantRouter);
+app.use('/api/v1/foods', foodRouter);
+app.use('/api/v1/cities', cityRouter);
+app.use('/api/v1/buses', busRouter);
+app.use('/api/v1/routes', routesRouter);
+app.use('/api/v1/tickets', ticketRouter);
+app.use('/api/v1/bus-seats', busSeatShowRouter);
 
-
-//serve static files from uploads and assets dir
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.get('/', (_req: Request, res: Response) => {
-  res.send('API is running successfully!')
-  
+  res.send('API is running successfully!');
 });
 
-const server = http.createServer(app);
-server.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-}
-);
+const startServer = async () => {
+  await connectdb();
+  const server = http.createServer(app);
+  server.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+  });
+};
+
+startServer();

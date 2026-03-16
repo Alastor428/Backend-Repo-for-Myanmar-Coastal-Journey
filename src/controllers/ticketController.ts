@@ -1,130 +1,89 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
-import { Ticket } from '../models/busTicketModel';
+import {
+  createTicketService,
+  getAllTicketsService,
+  getTicketByIdService,
+  updateTicketService,
+  deleteTicketService,
+  filterTicketsByRouteService,
+} from '../services/ticketService';
+import { filterTicketByRouteQuerySchema } from '../validations/ticketSchema';
+import { parsePagination } from '../validations/commonSchema';
 
-/*
-    create new ticket
-*/
-
-export const createTicket = asyncHandler(
-    async (
-    req: Request,
-    res: Response,
-) => {
-    const { ticketName, busId, source, destination, departureDate, ticketPrice, noOfPassenger, isForeigner } = req.body
-
-    if(!ticketName || !busId || !source || !destination || !departureDate || !ticketPrice || !noOfPassenger || !isForeigner){
-        res.status(400).json({
-            success: false,
-            status: 400,
-            message: "ticketName, busId, source, destination, arrivalTime, durationTime, ticketPrice, noOfPassenger, TicketType fields are required"
-        });
-    }
-
-    //create ticket
-    const ticket = new Ticket({
-        ticketName,
-        busId,
-        source,
-        destination,
-        departureDate,
-        ticketPrice,
-        noOfPassenger,
-        isForeigner,
-    })
-
-    const savedTicket = await ticket.save();
-    console.log('This ticket saved in db', savedTicket);
-
-    res.status(201).json({
-            success: true,
-            status: 201,
-            message: ' Ticket Created Successfully',
-            data: ticket
-        })
+export const createTicket = asyncHandler(async (req: Request, res: Response) => {
+  const savedTicket = await createTicketService(req.body);
+  res.status(201).json({
+    success: true,
+    status: 201,
+    message: 'Ticket Created Successfully',
+    data: savedTicket,
+  });
 });
 
-/*
-    Get all Buses
-*/
+export const getAllTicket = asyncHandler(async (req: Request, res: Response) => {
+  const pagination = parsePagination(req.query);
+  const result = await getAllTicketsService(pagination);
 
-export const getAllTicket = asyncHandler(
-    async (
-    req: Request,
-    res: Response,
-) => {
-        const allTicketData = await Ticket.find()
-        .select('-createdAt -updatedAt -__v');
-
-        if(!allTicketData || allTicketData.length === 0) {
-            res.status(404)
-            throw new Error('Ticket Data Not Found')
-        }
-
-        res.status(200).json({
-            success: true,
-            status: 200,
-            message: 'All Tickets Displayed',
-            data: allTicketData,
-        })
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'All Tickets Displayed',
+    ...result,
+  });
 });
 
-/*
-    Get a ticket by id
-*/
-
-export const getTicketById = asyncHandler(
-    async (
-    req: Request,
-    res: Response
-) => {
-        const id = req.params.id;
-        const ExistedTicket = await Ticket.findById(id);
-
-        if(!ExistedTicket) {
-            res.status(403)
-            throw new Error('Invalid TicketId. Wrong Parameter Passed')
-        } else {
-            res.status(200).json({
-                success: true,
-                status: 200,
-                message: "Ticket Data Displayed",
-                data: ExistedTicket,
-            })
-        }
+export const getTicketById = asyncHandler(async (req: Request, res: Response) => {
+  const ticket = await getTicketByIdService(req.params.id);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Ticket Data Displayed',
+    data: ticket,
+  });
 });
 
-/*
-    Filter options
-    Get Ticket by bus route
-*/
+export const updateTicket = asyncHandler(async (req: Request, res: Response) => {
+  const ticket = await updateTicketService(req.params.id, req.body);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Ticket Updated Successfully',
+    data: ticket,
+  });
+});
 
-export const FilterTicketByBusRoute = asyncHandler(
-    async (
-    req: Request,
-    res: Response,
-) => {
-        const { source, destination } = req.query;
+export const deleteTicket = asyncHandler(async (req: Request, res: Response) => {
+  await deleteTicketService(req.params.id);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Ticket Deleted Successfully',
+  });
+});
 
-        if(!source || !destination) {
-            res.status(400).json({
-            success: false,
-            status: 400,
-            message: "filter params 'source, destination' are required'"
-            });
-        } 
+export const FilterTicketByBusRoute = asyncHandler(async (req: Request, res: Response) => {
+  const parsed = filterTicketByRouteQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(422).json({
+      success: false,
+      status: 422,
+      message: 'Validation failed',
+      errors: parsed.error.flatten(),
+    });
+    return;
+  }
 
-        const tickets = await Ticket.find({
-            source: { $regex: `^${source}$`, $options: "i" },
-            destination: { $regex: `^${destination}$`, $options: "i" },
-        }).populate('busId');
+  const { source, destination, page, limit, sortBy, sortOrder } = parsed.data;
+  const result = await filterTicketsByRouteService(
+    { source, destination },
+    { page, limit, sortBy, sortOrder: sortOrder ?? 'asc' }
+  );
 
-        res.status(200).json({
-            success: true,
-            status: 200,
-            message: "Tickets filtered successfully",
-            data: tickets,
-        });
-
-    
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Tickets filtered successfully',
+    ...result,
+  });
 });

@@ -20,14 +20,17 @@ const storage = multer.diskStorage({
 });
 
 // file filter to accept only images
-function fileFilter (req, file, cb) {
-
-    if (file.mimetype.startsWith("image/")){
+function fileFilter(
+  _req: Express.Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) {
+  if (file.mimetype.startsWith('image/')) {
         cb(null, true);
-    } else {
-        cb(new Error("Only images are allowed"), false);
-    }
-};
+  } else {
+    cb(new Error('Only images are allowed'), false);
+  }
+}
 
 //initialize multer instance
 export const upload = multer({ storage, fileFilter });

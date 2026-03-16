@@ -93,10 +93,12 @@ npm start
 - ✅ Project setup and configuration
 - ✅ Mongo Setup (MongoDB Atlas + Mongoose)
 - ✅ TypeScript build and scripts (tsc, dev, start)
-- ✅ User schema design
+- ✅ User schema design (local + foreign support: NRC / Passport)
 - ✅ Authentication system (JWT + bcrypt)
-- ✅ User endpoints (register, login, logout, refresh-token, list users, get user by id)
+- ✅ User endpoints (register, login, logout, refresh-token, list users, get user by id, update, delete)
 - ✅ User validation schemas (Zod)
+- ✅ Local vs Foreign users (NRC for Myanmar citizens, Passport for foreigners)
+- ✅ Age requirement: 12+ to register and book
 - ✅ Rate limiting (login/register attempts)
 - ✅ Region, beach, restaurant schema design and endpoints
 - ✅ City schema and endpoints (list, create)
@@ -104,7 +106,8 @@ npm start
 - ✅ Travel route schema and endpoints (list, create)
 - ✅ Bus schema and endpoints (list, filter by departure time, filter by source/destination, create)
 - ✅ Ticket schema and endpoints (list, filter by source/destination, get by id, create)
-- ✅ Bus seat show schema and endpoints (get by id, create show, update seat status)
+- ✅ Bus seat show schema and endpoints (get by id, create show, update seat status, update, delete)
+- ✅ CRUD endpoints (update, delete) for all resources
 - ✅ Validation middleware and Zod schemas for all data endpoints
 - ✅ Services layer (beach, restaurant, city, food, route, bus, ticket, bus show)
 - ✅ Image upload (beach images, multer)
@@ -115,34 +118,11 @@ npm start
 
 For full API reference (Data | Endpoint | Notes) for the frontend team, see **[API.md](API.md)**.
 
-```
-#Authentication
+### User types
 
-Register User
-POST http://localhost:3000/api/v1/auth/register
-
-Login User
-POST http://localhost:3000/api/v1/auth/login
-
-Logout User
-POST http://localhost:3000/api/v1/auth/logout
-
-Refresh Token
-POST http://localhost:3000/api/v1/auth/refresh-token
-
-#Show User
-
-Get All Users
-GET http://localhost:3000/api/v1/auth/users
-
-Get User (Param: Id)
-GET http://localhost:3000/api/v1/auth/users/:id
-
-#Coastal Part
-
-Create Region
-POST http://localhost:3000/api/v1/coastal/regions
-```
+- **Local users** (`isForeigner: false`): NRC required (Myanmar format), phone must start with `09`
+- **Foreign users** (`isForeigner: true`): Passport required (6-20 alphanumeric), international phone format
+- **Age requirement:** Users must be at least 12 years old to register and to book seats
 
 ## License
 

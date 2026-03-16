@@ -1,127 +1,77 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
-import mongoose from 'mongoose';
-import { Food } from '../models/foodModel';
-import { Restaurant } from '../models/restaurantModel';
+import {
+  createFoodService,
+  getFoodsByRestaurantIdService,
+  filterFoodsByRestaurantNameService,
+  getFoodByIdService,
+  updateFoodService,
+  deleteFoodService,
+} from '../services/foodService';
+import { parsePagination } from '../validations/commonSchema';
 
-/*
-    Create new Food
-*/
-
-export const createFood = asyncHandler(
-    async (
-    req: Request,
-    res: Response,
-) => {
-        const { restaurant, foodName, foodPrice } = req.body;
-
-        if(!foodName || !foodPrice || !restaurant) {
-            res.status(400).json({
-                success: false,
-                status: 400,
-                message: "foodName, foodPrice, restaurant fields are required"
-            });
-        }
-
-        //create food
-        const food = new Food({
-            foodName,
-            foodPrice,
-            restaurant,
-        })
-
-        const savedfood = await food.save();
-        console.log('This food saved in db', savedfood);
-
-        res.status(201).json({
-            success: true,
-            status: 201,
-            message: 'Food Created Successfully',
-            data: food
-        })
+export const createFood = asyncHandler(async (req: Request, res: Response) => {
+  const savedFood = await createFoodService(req.body);
+  res.status(201).json({
+    success: true,
+    status: 201,
+    message: 'Food Created Successfully',
+    data: savedFood,
+  });
 });
 
-/*
-    Get all foods from a restaurant
-*/
+export const getFoodByRestaurantId = asyncHandler(async (req: Request, res: Response) => {
+  const pagination = parsePagination(req.query);
+  const result = await getFoodsByRestaurantIdService(req.params.id, pagination);
 
-export const getFoodByRestaurantId = asyncHandler(
-    async (
-    req: Request,
-    res: Response
-) => {
-        const id = req.params.id;
-    
-        if(!id) {
-            res.status(400).json({
-                success: false,
-                status: 400,
-                message: 'Param Restaurant ID is required',
-            });
-            return
-        } else{
-
-       // convert string -> ObjectId
-        const restaurant = new mongoose.Types.ObjectId(id);
-
-        const foods = await Food.find({ restaurant: restaurant }).populate('restaurant', 'restaurantName').select(' -createdAt -updatedAt -__v');
-
-        res.status(200).json({
-            success: true,
-            status: 200,
-            count: foods.length,
-            message: 'Food Displayed By Restaurant Id',
-            data: foods,
-        })
-
-
-        }
-
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Food Displayed By Restaurant Id',
+    ...result,
+  });
 });
 
-/* 
-    Filter options
-    Filter Foods from restaurant
-*/
-export const filterFoodByRestaurant = asyncHandler(
-    async (
-    req: Request,
-    res: Response,
-) => {
-        const { restaurantName } = req.query;
+export const filterFoodByRestaurant = asyncHandler(async (req: Request, res: Response) => {
+  const query = req.query as unknown as { restaurantName: string; page: number; limit: number; sortBy?: string; sortOrder?: 'asc' | 'desc' };
+  const result = await filterFoodsByRestaurantNameService(
+    { restaurantName: query.restaurantName },
+    { page: query.page ?? 1, limit: query.limit ?? 10, sortBy: query.sortBy, sortOrder: query.sortOrder ?? 'asc' }
+  );
 
-        if(!restaurantName) {
-            res.status(400).json({
-            success: false,
-            status: 400,
-            message: "filter option 'restaurantName' is required'"
-            });
-        }
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Filtered Foods Successfully',
+    ...result,
+  });
+});
 
-        const restaurant = await Restaurant.findOne({ restaurantName: restaurantName});
+export const getFoodById = asyncHandler(async (req: Request, res: Response) => {
+  const food = await getFoodByIdService(req.params.id);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Food Data Displayed',
+    data: food,
+  });
+});
 
-        if(!restaurant) {
-            res.status(404).json({
-                success: false,
-                status: 400,
-                message: 'Restaurant Not Found',
-            })
-        };
+export const updateFood = asyncHandler(async (req: Request, res: Response) => {
+  const food = await updateFoodService(req.params.id, req.body);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Food Updated Successfully',
+    data: food,
+  });
+});
 
-        const foods = await Food.find({
-            restaurant: restaurant?._id
-        } as any)
-        .populate({
-            path: 'restaurant',
-            select: 'restaurantName'
-        })
-        .sort({ foodPrice: 1 })
-        .select('-createdAt -updatedAt -__v');
-
-        res.status(200).json({
-            success: true,
-            status: 200,
-            message: 'Filtered Foods Successfully',
-            data: foods,
-        });
+export const deleteFood = asyncHandler(async (req: Request, res: Response) => {
+  await deleteFoodService(req.params.id);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Food Deleted Successfully',
+  });
 });

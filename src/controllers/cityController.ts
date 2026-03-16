@@ -1,61 +1,61 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
-import { City } from '../models/cityModel';
+import {
+  createCityService,
+  getAllCitiesService,
+  getCityByIdService,
+  updateCityService,
+  deleteCityService,
+} from '../services/cityService';
+import { parsePagination } from '../validations/commonSchema';
 
-/*
-    create new city
-*/
-export const createCity = asyncHandler(
-    async (
-    req: Request,
-    res: Response,
-) => {
-        const { cityName } = req.body
-
-        if(!cityName) {
-            res.status(400).json({
-                success: false,
-                status: 400,
-                message: "city field is required"
-            });
-        }
-
-        //create city
-        const city = new City({
-            cityName,
-        })
-
-        const savedCity = await city.save();
-        console.log('This city saved in db', savedCity);
-
-        res.status(201).json({
-            success: true,
-            status: 201,
-            message: 'City Created Successfully',
-            data: city
-        })
+export const createCity = asyncHandler(async (req: Request, res: Response) => {
+  const savedCity = await createCityService(req.body);
+  res.status(201).json({
+    success: true,
+    status: 201,
+    message: 'City Created Successfully',
+    data: savedCity,
+  });
 });
 
+export const getAllCity = asyncHandler(async (req: Request, res: Response) => {
+  const pagination = parsePagination(req.query);
+  const result = await getAllCitiesService(pagination);
 
-/*
-    Get all cities
-*/
-export const getAllCity = asyncHandler(
-    async (
-    req: Request,
-    res: Response,
-) => {
-       const allCityData = await City.find().sort({cityName: 1});
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'City Displayed',
+    ...result,
+  });
+});
 
-       if(!allCityData || allCityData.length === 0) {
-            res.status(404)
-            throw new Error('Beach Data Not Found');
-       } 
-    
-        res.status(200).json({
-            success: true,
-            status: 200,
-            message: 'City Displayed',
-            data: allCityData,
-        })
+export const getCityById = asyncHandler(async (req: Request, res: Response) => {
+  const city = await getCityByIdService(req.params.id);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'City Data Displayed',
+    data: city,
+  });
+});
+
+export const updateCity = asyncHandler(async (req: Request, res: Response) => {
+  const city = await updateCityService(req.params.id, req.body);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'City Updated Successfully',
+    data: city,
+  });
+});
+
+export const deleteCity = asyncHandler(async (req: Request, res: Response) => {
+  await deleteCityService(req.params.id);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'City Deleted Successfully',
+  });
 });

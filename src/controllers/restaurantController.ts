@@ -1,95 +1,61 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
-import { Restaurant } from '../models/restaurantModel';
+import {
+  createRestaurantService,
+  getAllRestaurantsService,
+  getRestaurantByIdService,
+  updateRestaurantService,
+  deleteRestaurantService,
+} from '../services/restaurantService';
+import { parsePagination } from '../validations/commonSchema';
 
-/*
-    Create new Restaurant
-*/
-
-export const createRestaurant = asyncHandler(
-    async (
-    req: Request,
-    res: Response,
-) => {
-        const { restaurantName, region, beach, phone }= req.body;
-
-        if(!restaurantName || !region || !beach || !phone) {
-             res.status(400).json({
-                success: false,
-                status: 400,
-                message: "restaurantName, region, beach, phone fields are required"
-            });
-            
-        }
-
-        //create restaurant
-        const restaurant = new Restaurant({
-            restaurantName,
-            region,
-            beach,
-            phone,
-        })
-
-        const savedRestaurant = await restaurant.save();
-        console.log('This restaurant saved in db', savedRestaurant);
-
-        res.status(201).json({
-            success: true,
-            status: 201,
-            message: 'Restaurant Created Successfully',
-            data: restaurant
-        })
-
+export const createRestaurant = asyncHandler(async (req: Request, res: Response) => {
+  const savedRestaurant = await createRestaurantService(req.body);
+  res.status(201).json({
+    success: true,
+    status: 201,
+    message: 'Restaurant Created Successfully',
+    data: savedRestaurant,
+  });
 });
 
-/*
-    Get all restaurants
-*/
-export const getAllRestaurants = asyncHandler(
-    async (
-    req: Request,
-    res: Response,
-) => {
-        const allRestaurantData = await Restaurant.find()
-        .populate('region','regionName')
-        .populate('beach','beachName')
-        .sort({restaurantName: 1});
+export const getAllRestaurants = asyncHandler(async (req: Request, res: Response) => {
+  const pagination = parsePagination(req.query);
+  const result = await getAllRestaurantsService(pagination);
 
-        if(!allRestaurantData || allRestaurantData.length === 0) {
-            res.status(404)
-            throw new Error('Restaurant Data Not Found');
-        }
-
-        res.status(200).json({
-            success: true,
-            status: 200,
-            message: 'Restaurant Displayed',
-            data: allRestaurantData,
-        })
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Restaurant Displayed',
+    ...result,
+  });
 });
 
-/*
-    Get a restaurant by id
-*/
+export const getRestaurantById = asyncHandler(async (req: Request, res: Response) => {
+  const restaurant = await getRestaurantByIdService(req.params.id);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Restaurant Data Displayed',
+    data: restaurant,
+  });
+});
 
-export const getRestaurantById = asyncHandler(
-    async (
-    req: Request,
-    res: Response
-) => {
-        const id = req.params.id;
-        const ExistedRestaurant = await Restaurant.findById(id);
+export const updateRestaurant = asyncHandler(async (req: Request, res: Response) => {
+  const restaurant = await updateRestaurantService(req.params.id, req.body);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Restaurant Updated Successfully',
+    data: restaurant,
+  });
+});
 
-        if (!ExistedRestaurant) {
-            res.status(403)
-            throw new Error("Invalid RestaurantId. Wrong Parameter Passed")
-        } else {
-            res.status(200).json({
-                success: true,
-                status: 200,
-                message: "Restaurant Data Displayed",
-                data: ExistedRestaurant,
-            })
-        }
-
+export const deleteRestaurant = asyncHandler(async (req: Request, res: Response) => {
+  await deleteRestaurantService(req.params.id);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Restaurant Deleted Successfully',
+  });
 });

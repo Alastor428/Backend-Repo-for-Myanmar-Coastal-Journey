@@ -99,13 +99,26 @@ Protected endpoints require the header: **`Authorization: Bearer <access_token>`
 
 ## Bus seat shows (availability & seat selection)
 
+Seat layout uses **row** `"1"`–`"11"` and seat **numbers** like **`1A`**, **`2B`**, … **`11D`** (columns **A–D**). Each seat has:
+
+| `status` | Meaning |
+|----------|--------|
+| `Available` | Free; user can select it. |
+| `Selected` | Held in DB for checkout; `selectedBy` is the user who selected it (only that user can deselect or confirm). |
+| `Unavailable` | Sold / not bookable; other users see it as taken. |
+
+**Recommended flow:** use **POST** `/seats/selection` while the user taps seats, then **POST** `/seats/confirm` after payment succeeds.
+
 | Data | Endpoint | Notes |
 |------|----------|--------|
-| Get bus show by ID (seat layout & availability) | **GET** `/api/v1/bus-seats/:id` | Bearer required. Params: `id` = bus show ObjectId. Returns show with `seatLayout`. |
+| List all bus shows | **GET** `/api/v1/bus-seats` | Bearer required. No query params. Returns all shows (newest first) with populated `bus` and `ticket`, each including `seatLayout`. |
+| Get bus show by ID (seat layout & availability) | **GET** `/api/v1/bus-seats/:id` | Bearer required. Params: `id` = bus show ObjectId. Returns show with `seatLayout` (each seat may include `selectedBy` when `status` is `Selected`). |
 | Create a bus show | **POST** `/api/v1/bus-seats` | Bearer required. Body (JSON): `ticket` (ObjectId), `busId` (ObjectId), `departureTime` (optional). |
 | Update bus show | **PUT** `/api/v1/bus-seats/:id` | Bearer required. Body: `{ "departureTime": "..." }`. |
 | Delete bus show | **DELETE** `/api/v1/bus-seats/:id` | Bearer required. |
-| Update seat status (select/release seat) | **PUT** `/api/v1/bus-seats/:showId/seat?row=A&seatNumber=1&status=Selected` | Bearer required. **Age requirement:** User must be at least 12 years old to book. Params: `showId` = bus show ObjectId. Query: `row`, `seatNumber`, `status` (`"Available"` \| `"Selected"` \| `"Unavailable"`). Returns 403 if user is under 12 or has no `dateOfBirth`. |
+| **Toggle seat selection** (tap to select / deselect) | **POST** `/api/v1/bus-seats/:showId/seats/selection` | Bearer required (any authenticated user). **Body (JSON):** `{ "seatIds": ["1A", "3B"] }` — each id must be row **1–11** plus column **A–D** (e.g. `1A`, `11D`). **Behavior:** `Available` → `Selected` for the current user; `Selected` by the same user → `Available`; `Unavailable` or `Selected` by another user → error. **Response `data`:** `{ "show": { ... }, "booking": { ... } }` where `booking` is `{ "selectedSeatIds": string[], "quantity": number, "unitPrice": number, "totalPrice": number, "currency": "MMK" }` (`unitPrice` comes from the show’s `price`; `totalPrice` = `quantity × unitPrice`). Use `booking` for the UI summary (selected seats + total). |
+| **Confirm seats after payment** | **POST** `/api/v1/bus-seats/:showId/seats/confirm` | Bearer required. **Age requirement:** same as booking — user must be at least 12 and have `dateOfBirth` on profile (`requireAgeForBooking`). **Body (JSON):** `{ "seatIds": ["1A", "3B"] }`. Each seat must be `Selected` with `selectedBy` equal to the current user. Sets those seats to `Unavailable`. **Response `data`:** `{ "show": { ... }, "booking": { ... } }` with receipt-style `booking` (confirmed seats, quantity, prices in MMK). |
+| Update seat status (legacy / admin-style) | **PUT** `/api/v1/bus-seats/:showId/seat?row=1&seatNumber=1A&status=Selected` | Bearer required. **Age requirement:** User must be at least 12 years old to book. Params: `showId` = bus show ObjectId. Query: **`row`** = row key in DB (`"1"`–`"11"`), **`seatNumber`** = full seat id (e.g. `1A`, same as `seatLayout[].seats[].number`), **`status`** = `Available`, `Selected`, or `Unavailable`. When status is not `Selected`, `selectedBy` is cleared on that seat. Returns 403 if user is under 12 or has no `dateOfBirth`. |
 
 ---
 
@@ -169,4 +182,7 @@ Both require `dateOfBirth` at registration. Users must be **at least 12 years ol
 1. **Load “From” dropdown:** **GET** `/api/v1/cities` → use `data[].cityName`.
 2. **Load “To” dropdown:** **GET** `/api/v1/beaches` → use `data[].beachName`.
 3. **Search tickets:** **GET** `/api/v1/tickets/filter/op1?source=<cityName>&destination=<beachName>` (e.g. Yangon, Ngapali). Filter or display by `departureDate`, `noOfPassenger`, `isForeigner` (Local/Foreigner) on the client, or request backend support for these filters later.
-4. **Seat selection:** **GET** `/api/v1/bus-seats/:id` for seat map; **PUT** `/api/v1/bus-seats/:showId/seat?row=...&seatNumber=...&status=Selected` when user picks a seat. **Note:** User must be at least 12 years old to book.
+4. **List shows (optional):** **GET** `/api/v1/bus-seats` to list all shows, or **GET** `/api/v1/bus-seats/:id` for one show’s seat map.
+5. **Seat selection (recommended):** **POST** `/api/v1/bus-seats/:showId/seats/selection` with body `{ "seatIds": ["1A"] }` each time the user toggles seats. Read `data.booking` for `selectedSeatIds`, `quantity`, `unitPrice`, `totalPrice`, and `currency` (MMK) for the checkout summary.
+6. **After payment succeeds:** **POST** `/api/v1/bus-seats/:showId/seats/confirm` with the same `seatIds` to mark seats `Unavailable` for everyone else. **Note:** Confirm requires the user to be at least 12 years old with `dateOfBirth` set; selection toggling only requires a valid Bearer token.
+7. **Legacy alternative:** **PUT** `/api/v1/bus-seats/:showId/seat?row=<row>&seatNumber=<seatId>&status=...` with `row` = `"1"`–`"11"` and `seatNumber` = e.g. `1A`. Still subject to age check for booking.

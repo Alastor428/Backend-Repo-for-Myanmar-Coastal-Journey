@@ -44,17 +44,24 @@ export const updateSeatService = async (
   seatNumber: string,
   status: seatStatus
 ) => {
+  const updateDoc: Record<string, unknown> = {
+    $set: {
+      "seatLayout.$[r].seats.$[s].status": status,
+    },
+  };
+  if (status !== seatStatus.Selected) {
+    updateDoc.$unset = {
+      "seatLayout.$[r].seats.$[s].selectedBy": "",
+    };
+  }
+
   const result = await Show.updateOne(
     {
       _id: new Types.ObjectId(showId),
       "seatLayout.row": row,
       "seatLayout.seats.number": seatNumber,
     },
-    {
-      $set: {
-        "seatLayout.$[r].seats.$[s].status": status,
-      },
-    },
+    updateDoc,
     {
       arrayFilters: [
         { "r.row": row },

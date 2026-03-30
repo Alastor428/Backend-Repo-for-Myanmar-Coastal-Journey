@@ -3,6 +3,8 @@ import {
   createBusShow,
   getAllBusShows,
   getBusShowById,
+  toggleSeatSelection,
+  confirmSeatsBooking,
   updateSeatStatus,
   updateBusShow,
   deleteBusShow,
@@ -14,6 +16,9 @@ import {
   updateBusShowSchema,
   getAllBusShowsQuerySchema,
   getBusShowByIdParamsSchema,
+  seatBookingShowIdParamsSchema,
+  toggleSeatSelectionBodySchema,
+  confirmSeatsBodySchema,
   updateSeatStatusParamsSchema,
   updateSeatStatusQuerySchema,
 } from '../validations/busShowSchema';
@@ -22,6 +27,21 @@ const busSeatShowRouter = Router();
 
 busSeatShowRouter.post('/', authenticateToken, validate(createBusShowSchema, 'body'), createBusShow);
 busSeatShowRouter.get('/', authenticateToken, validate(getAllBusShowsQuerySchema, 'query'), getAllBusShows);
+busSeatShowRouter.post(
+  '/:showId/seats/selection',
+  authenticateToken,
+  validate(seatBookingShowIdParamsSchema, 'params'),
+  validate(toggleSeatSelectionBodySchema, 'body'),
+  toggleSeatSelection
+);
+busSeatShowRouter.post(
+  '/:showId/seats/confirm',
+  authenticateToken,
+  requireAgeForBooking,
+  validate(seatBookingShowIdParamsSchema, 'params'),
+  validate(confirmSeatsBodySchema, 'body'),
+  confirmSeatsBooking
+);
 busSeatShowRouter.get('/:id', authenticateToken, validate(getBusShowByIdParamsSchema, 'params'), getBusShowById);
 busSeatShowRouter.put(
   '/:id',

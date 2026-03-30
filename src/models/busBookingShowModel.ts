@@ -15,6 +15,7 @@ export interface IBusShow {
         seats : {
             number: string;
             status: seatStatus;
+            selectedBy?: Types.ObjectId;
         }[];
     }[];
 
@@ -57,7 +58,12 @@ const busShowSchema = new mongoose.Schema<IBusShow>({
           type: String,
           enum: Object.values(seatStatus),
           default: seatStatus.Available
-        }
+        },
+        selectedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: false,
+        },
       }
     ]
   }

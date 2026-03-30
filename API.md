@@ -109,6 +109,45 @@ Protected endpoints require the header: **`Authorization: Bearer <access_token>`
 
 ---
 
+## Hotels
+
+| Data | Endpoint | Notes |
+|------|----------|--------|
+| List hotels | **GET** `/api/v1/hotels` | Bearer required. Query: `page`, `limit`, optional `sortBy`, `sortOrder`. |
+| Filter hotels by beach | **GET** `/api/v1/hotels/filter/beach?beachId=<beachObjectId>` | Bearer required. Query: `beachId`, plus pagination (`page`, `limit`, `sortBy`, `sortOrder`). |
+| Get hotel by ID | **GET** `/api/v1/hotels/:id` | Bearer required. Params: `id` = hotel ObjectId. |
+| Create hotel | **POST** `/api/v1/hotels` | Bearer required. Body (JSON): `hotelName`, `beach` (ObjectId), `hotelRating` (0–5). |
+| Update hotel | **PUT** `/api/v1/hotels/:id` | Bearer required. Params: `id`. Body: partial `hotelName`, `beach`, `hotelRating` (at least one). |
+| Delete hotel | **DELETE** `/api/v1/hotels/:id` | Bearer required. Params: `id`. |
+
+---
+
+## Rooms
+
+| Data | Endpoint | Notes |
+|------|----------|--------|
+| List rooms | **GET** `/api/v1/rooms` | Bearer required. Query: `page`, `limit`, optional `sortBy`, `sortOrder`. |
+| Filter rooms by room type | **GET** `/api/v1/rooms/filter/room-type?roomType=Standard%20double%20or%20twin%20room` | Bearer required. Query: `roomType` plus pagination (`page`, `limit`, `sortBy`, `sortOrder`). |
+| Get room by ID | **GET** `/api/v1/rooms/:id` | Bearer required. Params: `id` = room ObjectId. |
+| Create room | **POST** `/api/v1/rooms` | Bearer required. Body (JSON): `hotel` (ObjectId), `roomType`, `roomPricePerNight`, `roomCapacity`, `roomDescription`. |
+| Update room | **PUT** `/api/v1/rooms/:id` | Bearer required. Params: `id`. Body: partial `hotel`, `roomType`, `roomPricePerNight`, `roomCapacity`, `roomDescription` (at least one). |
+| Delete room | **DELETE** `/api/v1/rooms/:id` | Bearer required. Params: `id`. |
+
+---
+
+## Hotel bookings
+
+| Data | Endpoint | Notes |
+|------|----------|--------|
+| Create hotel booking | **POST** `/api/v1/hotel-bookings` | Bearer required. Body: `hotel` (ObjectId), `guestName`, optional `taxIncluded`, optional `currency`, `lineItems[]` with `room`, `checkInDate`, `checkOutDate`, optional notes, `numberOfRooms`, `numberOfAdults`. Backend calculates nights + totals. |
+| List my hotel bookings | **GET** `/api/v1/hotel-bookings` | Bearer required. Query: `page`, `limit`, optional `sortBy`, `sortOrder`. |
+| Get my hotel booking by ID | **GET** `/api/v1/hotel-bookings/:id` | Bearer required. Params: `id` = booking ObjectId. |
+| Update my hotel booking | **PUT** `/api/v1/hotel-bookings/:id` | Bearer required. Params: `id`. Body: partial `guestName`, `taxIncluded`, `lineItems` (at least one). Recalculates totals when line items provided. |
+| **Confirm my hotel booking** | **PUT** `/api/v1/hotel-bookings/:id/confirm` | Bearer required. Params: `id`. Marks booking as confirmed and sets `confirmedAt`. |
+| Delete my hotel booking | **DELETE** `/api/v1/hotel-bookings/:id` | Bearer required. Params: `id`. |
+
+---
+
 ## Restaurants
 
 | Data | Endpoint | Notes |

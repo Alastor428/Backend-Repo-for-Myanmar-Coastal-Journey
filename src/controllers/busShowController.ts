@@ -8,6 +8,10 @@ import {
   updateBusShowService,
   deleteBusShowService,
 } from '../services/busShowService';
+import {
+  toggleSeatsSelectionService,
+  confirmSeatsAfterPaymentService,
+} from '../services/seatBookingService';
 import { seatStatus } from '../models/busBookingShowModel';
 
 export const createBusShow = asyncHandler(async (req: Request, res: Response) => {
@@ -37,6 +41,44 @@ export const getBusShowById = asyncHandler(async (req: Request, res: Response) =
     status: 200,
     message: 'Bus Seat Show Displayed',
     data: show,
+  });
+});
+
+export const toggleSeatSelection = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.userId;
+  if (!userId) {
+    res.status(401).json({ success: false, message: 'Unauthorized' });
+    return;
+  }
+  const { showId } = req.params as { showId: string };
+  const { seatIds } = req.body as { seatIds: string[] };
+
+  const { show, booking } = await toggleSeatsSelectionService(showId, userId, seatIds);
+
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Seat selection updated',
+    data: { show, booking },
+  });
+});
+
+export const confirmSeatsBooking = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.userId;
+  if (!userId) {
+    res.status(401).json({ success: false, message: 'Unauthorized' });
+    return;
+  }
+  const { showId } = req.params as { showId: string };
+  const { seatIds } = req.body as { seatIds: string[] };
+
+  const { show, booking } = await confirmSeatsAfterPaymentService(showId, userId, seatIds);
+
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Seats booked successfully',
+    data: { show, booking },
   });
 });
 

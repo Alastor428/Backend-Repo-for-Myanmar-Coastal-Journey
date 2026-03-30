@@ -16,6 +16,9 @@ import routesRouter from './routes/routesRoute';
 import busRouter from './routes/busRoute';
 import ticketRouter from './routes/ticketRoute';
 import busSeatShowRouter from './routes/busSeatShowRoute';
+import hotelRouter from './routes/hotelRoute';
+import roomRouter from './routes/roomRoute';
+import hotelBookingRouter from './routes/hotelBookingRoute';
 
 dotenv.config();
 
@@ -40,6 +43,9 @@ app.use('/api/v1/buses', busRouter);
 app.use('/api/v1/routes', routesRouter);
 app.use('/api/v1/tickets', ticketRouter);
 app.use('/api/v1/bus-seats', busSeatShowRouter);
+app.use('/api/v1/hotels', hotelRouter);
+app.use('/api/v1/rooms', roomRouter);
+app.use('/api/v1/hotel-bookings', hotelBookingRouter);
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 

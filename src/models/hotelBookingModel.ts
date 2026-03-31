@@ -17,7 +17,7 @@ export interface IHotelBookingLineItem {
 export interface IHotelBooking {
   user: Types.ObjectId;
   hotel: Types.ObjectId;
-  guestName: string;
+  guestName?: string;
   status: 'Pending' | 'Confirmed';
   confirmedAt?: Date;
   taxIncluded: boolean;
@@ -45,11 +45,11 @@ const lineItemSchema = new mongoose.Schema<IHotelBookingLineItem>(
     },
     checkInTimeNote: { 
       type: String, 
-      default: 'after 14:00' 
+      default: '14:00' 
     },
     checkOutTimeNote: { 
       type: String, 
-      default: 'Before 12:00' 
+      default: '12:00' 
     },
     numberOfRooms: { 
       type: Number, 
@@ -61,7 +61,8 @@ const lineItemSchema = new mongoose.Schema<IHotelBookingLineItem>(
     },
     lengthOfStayNights: { 
       type: Number, 
-      required: true },
+      required: true 
+    },
     lineTotalPrice: { 
       type: Number, 
       required: true, 
@@ -84,7 +85,6 @@ const hotelBookingSchema = new mongoose.Schema<IHotelBooking>(
     },
     guestName: {
       type: String,
-      required: true,
       trim: true,
     },
     status: {

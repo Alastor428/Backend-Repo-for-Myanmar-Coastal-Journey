@@ -14,7 +14,7 @@ const lineItemInputSchema = z.object({
 export const createHotelBookingSchema = z
   .object({
     hotel: objectIdSchema,
-    guestName: z.string().min(1, 'Guest name is required'),
+    guestName: z.string().min(1).optional(),
     taxIncluded: z.boolean().optional(),
     currency: z.string().min(1).optional(),
     lineItems: z.array(lineItemInputSchema).min(1, 'At least one room line is required'),

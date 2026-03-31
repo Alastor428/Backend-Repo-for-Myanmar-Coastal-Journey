@@ -4,6 +4,7 @@ import {
   createHotelService,
   getAllHotelsService,
   getHotelsByBeachService,
+  getHotelsByBeachNameService,
   getHotelByIdService,
   updateHotelService,
   deleteHotelService,
@@ -35,6 +36,18 @@ export const getHotelsByBeach = asyncHandler(async (req: Request, res: Response)
   const q = req.query as { beachId: string };
   const pagination = parsePagination(req.query);
   const result = await getHotelsByBeachService(q.beachId, pagination);
+  res.status(200).json({
+    success: true,
+    status: 200,
+    message: 'Hotels for beach displayed',
+    ...result,
+  });
+});
+
+export const getHotelsByBeachName = asyncHandler(async (req: Request, res: Response) => {
+  const q = req.query as { beachName: string };
+  const pagination = parsePagination(req.query);
+  const result = await getHotelsByBeachNameService(q.beachName, pagination);
   res.status(200).json({
     success: true,
     status: 200,

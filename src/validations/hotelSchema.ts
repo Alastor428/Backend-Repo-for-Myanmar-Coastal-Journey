@@ -17,6 +17,10 @@ export const hotelsByBeachQuerySchema = z.object({
   beachId: objectIdSchema,
 });
 
+export const hotelsByBeachNameQuerySchema = paginationQuerySchema.extend({
+  beachName: z.string().min(1, 'Beach name is required'),
+});
+
 export const updateHotelSchema = z
   .object({
     hotelName: z.string().min(1).optional(),

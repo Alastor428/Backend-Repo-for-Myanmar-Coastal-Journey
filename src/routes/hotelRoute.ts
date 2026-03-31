@@ -3,6 +3,7 @@ import {
   createHotel,
   getAllHotels,
   getHotelsByBeach,
+  getHotelsByBeachName,
   getHotelById,
   updateHotel,
   deleteHotel,
@@ -15,6 +16,7 @@ import {
   listHotelsQuerySchema,
   getHotelByIdParamsSchema,
   hotelsByBeachQuerySchema,
+  hotelsByBeachNameQuerySchema,
 } from '../validations/hotelSchema';
 
 const hotelRouter = Router();
@@ -26,6 +28,12 @@ hotelRouter.get(
   authenticateToken,
   validate(hotelsByBeachQuerySchema, 'query'),
   getHotelsByBeach
+);
+hotelRouter.get(
+  '/filter/beach-name',
+  authenticateToken,
+  validate(hotelsByBeachNameQuerySchema, 'query'),
+  getHotelsByBeachName
 );
 hotelRouter.get('/:id', authenticateToken, validate(getHotelByIdParamsSchema, 'params'), getHotelById);
 hotelRouter.put(

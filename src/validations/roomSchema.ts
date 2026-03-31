@@ -9,7 +9,6 @@ export const createRoomSchema = z.object({
   roomType: z.nativeEnum(RoomTypes),
   roomPricePerNight: z.number().positive(),
   roomCapacity: z.number().int().positive(),
-  roomDescription: z.string().min(1),
 });
 
 export const getRoomByIdParamsSchema = z.object({
@@ -26,7 +25,6 @@ export const updateRoomSchema = z
     roomType: z.nativeEnum(RoomTypes).optional(),
     roomPricePerNight: z.number().positive().optional(),
     roomCapacity: z.number().int().positive().optional(),
-    roomDescription: z.string().min(1).optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: 'At least one field must be provided for update',

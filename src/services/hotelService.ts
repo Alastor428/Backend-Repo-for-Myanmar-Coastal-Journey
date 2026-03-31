@@ -1,4 +1,5 @@
 import { Hotel } from '../models/hotelModel';
+import { Beach } from '../models/beachModel';
 import type { CreateHotelInput, UpdateHotelInput } from '../validations/hotelSchema';
 import type { PaginationQuery } from '../validations/commonSchema';
 
@@ -38,7 +39,7 @@ export const getHotelsByBeachService = async (
   const skip = (page - 1) * limit;
   const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
 
-  let filter = { beach: beachId };
+  const filter = { beach: beachId } as any;
 
   const [data, total] = await Promise.all([
     Hotel.find(filter)
@@ -47,6 +48,36 @@ export const getHotelsByBeachService = async (
       .skip(skip)
       .limit(limit)
       .lean(),
+    Hotel.countDocuments(filter),
+  ]);
+
+  return {
+    data,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+};
+
+export const getHotelsByBeachNameService = async (
+  beachName: string,
+  pagination: PaginationQuery
+) => {
+  const { page, limit, sortBy = 'hotelName', sortOrder } = pagination;
+  const skip = (page - 1) * limit;
+  const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
+
+  const beaches = await Beach.find(
+    { beachName: { $regex: beachName, $options: 'i' } },
+    { _id: 1 }
+  ).lean();
+
+  const beachIds = beaches.map((b) => b._id);
+  const filter = (beachIds.length ? { beach: { $in: beachIds } } : { beach: { $in: [] } }) as any;
+
+  const [data, total] = await Promise.all([
+    Hotel.find(filter).populate('beach', 'beachName').sort(sort).skip(skip).limit(limit).lean(),
     Hotel.countDocuments(filter),
   ]);
 

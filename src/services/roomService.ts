@@ -8,7 +8,6 @@ export const createRoomService = async (data: CreateRoomInput) => {
     roomType: data.roomType,
     roomPricePerNight: data.roomPricePerNight,
     roomCapacity: data.roomCapacity,
-    roomDescription: data.roomDescription,
   });
   return room.save();
 };

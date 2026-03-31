@@ -9,7 +9,6 @@ export interface IRoom {
   roomType: RoomTypes;
   roomPricePerNight: number;
   roomCapacity: number;
-  roomDescription: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -33,11 +32,6 @@ const roomSchema = new mongoose.Schema<IRoom>(
     roomCapacity: {
       type: Number,
       required: true,
-    },
-    roomDescription: {
-      type: String,
-      required: true,
-      trim: true,
     },
   },
   { timestamps: true }

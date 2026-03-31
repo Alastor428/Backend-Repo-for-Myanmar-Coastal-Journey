@@ -70,8 +70,8 @@ export const createHotelBookingService = async (
   const saved = await booking.save();
   return HotelBooking.findById(saved._id)
     .populate('hotel', 'hotelName beach hotelRating')
-    .populate('user', 'name email')
-    .populate({ path: 'lineItems.room', select: 'roomType roomPricePerNight roomCapacity roomDescription hotel' });
+    .populate('user', 'name')
+    .populate({ path: 'lineItems.room', select: 'roomType roomPricePerNight roomCapacity hotel' });
 };
 
 export const getHotelBookingsForUserService = async (
@@ -143,7 +143,7 @@ export const updateHotelBookingService = async (
     { new: true }
   )
     .populate('hotel', 'hotelName beach hotelRating')
-    .populate({ path: 'lineItems.room', select: 'roomType roomPricePerNight roomCapacity roomDescription hotel' });
+    .populate({ path: 'lineItems.room', select: 'roomType roomPricePerNight roomCapacity hotel' });
 
   if (!booking) throw new Error('Invalid HotelBookingId. Wrong Parameter Passed');
   return booking;
@@ -162,7 +162,7 @@ export const confirmHotelBookingService = async (id: string, userId: string) => 
   return HotelBooking.findById(booking._id)
     .populate('hotel', 'hotelName beach hotelRating')
     .populate('user', 'name email')
-    .populate({ path: 'lineItems.room', select: 'roomType roomPricePerNight roomCapacity roomDescription hotel' });
+    .populate({ path: 'lineItems.room', select: 'roomType roomPricePerNight roomCapacity hotel' });
 };
 
 export const deleteHotelBookingService = async (id: string, userId: string) => {

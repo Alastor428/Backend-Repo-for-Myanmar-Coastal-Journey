@@ -1,10 +1,34 @@
 import bcrypt from 'bcrypt';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt, { JwtPayload, type SignOptions } from 'jsonwebtoken';
 import { Response } from 'express';
 import { User } from '../models/userModel';
 import { mailtrapClient, mailtrapSender } from '../../mailtrap/mailTrapConfig';
 import { emailVerificationTemplate } from '../../mailtrap/emailTemplate';
 import type { CreateUserType, LogInType, UpdateUserType } from '../validations/authSchema';
+
+/**
+ * JWT lifetimes (jsonwebtoken `expiresIn`). Override per environment.
+ * - Shorter access token = smaller window if leaked; users refresh more often.
+ * - Longer refresh = fewer re-logins; store httpOnly + secure cookie.
+ */
+const ACCESS_TOKEN_EXPIRES_IN = (process.env.ACCESS_TOKEN_EXPIRES_IN ?? '7d') as NonNullable<
+  SignOptions['expiresIn']
+>;
+const REFRESH_TOKEN_EXPIRES_IN = (process.env.REFRESH_TOKEN_EXPIRES_IN ?? '30d') as NonNullable<
+  SignOptions['expiresIn']
+>;
+
+/** Match refresh-token cookie maxAge to the refresh JWT (`expiresIn`: seconds if number, else s/m/h/d string). */
+function jwtExpiresInToCookieMaxAgeMs(expiresIn: NonNullable<SignOptions['expiresIn']>): number {
+  if (typeof expiresIn === 'number') return expiresIn * 1000;
+  const m = /^(\d+)([smhd])$/i.exec(String(expiresIn).trim());
+  if (!m) return 30 * 24 * 60 * 60 * 1000;
+  const n = parseInt(m[1], 10);
+  const unit = m[2].toLowerCase();
+  const seconds =
+    unit === 's' ? n : unit === 'm' ? n * 60 : unit === 'h' ? n * 3600 : n * 24 * 3600;
+  return seconds * 1000;
+}
 
 export const registerUserService = async (data: CreateUserType) => {
   const userExists = await User.findOne({ email: data.email });
@@ -121,7 +145,7 @@ export const refreshTokenService = async (refreshToken: string) => {
   const accessToken = jwt.sign(
     { id: foundUser._id, type: 'accessToken' },
     process.env.ACCESS_TOKEN_SECRET as string,
-    { expiresIn: '25min' }
+    { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
   );
   return { accessToken };
 };
@@ -130,20 +154,20 @@ export const generateToken = (res: Response, id: string): string => {
   const accessToken = jwt.sign(
     { id, type: 'accessToken' },
     process.env.ACCESS_TOKEN_SECRET as string,
-    { expiresIn: '25min' }
+    { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
   );
 
   const refreshToken = jwt.sign(
     { id, type: 'refreshToken' },
     process.env.REFRESH_TOKEN_SECRET as string,
-    { expiresIn: '1d' }
+    { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
   );
 
   res.cookie('jwt', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'none',
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: jwtExpiresInToCookieMaxAgeMs(REFRESH_TOKEN_EXPIRES_IN),
   });
 
   return accessToken;

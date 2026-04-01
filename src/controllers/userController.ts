@@ -28,12 +28,13 @@ export const registerUser = asyncHandler(async (req: Request, res: Response) => 
 
   const savedUser = await registerUserService(parsed.data);
   const accessToken = generateToken(res, savedUser._id.toString());
+  const user = await getUserByIdService(savedUser._id.toString());
 
   res.status(201).json({
     success: true,
     status: 201,
     message: 'User Created Successfully',
-    user: savedUser,
+    user,
     accessToken,
   });
 });

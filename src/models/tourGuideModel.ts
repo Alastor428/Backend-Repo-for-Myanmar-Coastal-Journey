@@ -21,7 +21,6 @@ export interface ITourGuide {
   pricePerDay: number;
   currency: string;
   availability: TourGuideAvailability;
-  avatarUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -42,7 +41,6 @@ const tourGuideSchema = new mongoose.Schema<ITourGuide>(
       default: TourGuideAvailability.Available,
       index: true,
     },
-    avatarUrl: { type: String, trim: true },
   },
   { timestamps: true }
 );

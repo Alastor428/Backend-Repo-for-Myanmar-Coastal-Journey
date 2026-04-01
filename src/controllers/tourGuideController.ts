@@ -24,8 +24,11 @@ export const getAllTourGuides = asyncHandler(async (req: Request, res: Response)
   const q = req.query as unknown as {
     availableOnly?: boolean;
     beachId?: string;
+    beachName?: string;
     gender?: string;
     language?: string;
+    startDate?: Date;
+    endDate?: Date;
   };
   const result = await getAllTourGuidesService(pagination, q);
   res.status(200).json({

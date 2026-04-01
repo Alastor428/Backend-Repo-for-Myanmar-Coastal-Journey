@@ -6,11 +6,32 @@ export const listTourGuidesQuerySchema = z
   .object({
     availableOnly: z.coerce.boolean().optional(),
     beachId: objectIdSchema.optional(),
+    /** Case-insensitive partial match against `Beach.beachName` */
+    beachName: z.string().min(1).optional(),
     gender: z.nativeEnum(TourGuideGender).optional(),
     language: z.string().min(1).optional(),
+    /** When used with `endDate`, excludes guides with overlapping Pending/Confirmed bookings */
+    startDate: z.coerce.date().optional(),
+    endDate: z.coerce.date().optional(),
   })
   .merge(paginationQuerySchema)
-  .strict();
+  .strict()
+  .refine(
+    (data) =>
+      (data.startDate === undefined && data.endDate === undefined) ||
+      (data.startDate !== undefined && data.endDate !== undefined),
+    {
+      message: 'startDate and endDate must both be sent to filter by availability for a date range',
+      path: ['startDate'],
+    }
+  )
+  .refine(
+    (data) =>
+      !data.startDate ||
+      !data.endDate ||
+      data.endDate.getTime() > data.startDate.getTime(),
+    { message: 'endDate must be after startDate', path: ['endDate'] }
+  );
 
 export const createTourGuideSchema = z
   .object({
@@ -23,7 +44,6 @@ export const createTourGuideSchema = z
     pricePerDay: z.number().nonnegative(),
     currency: z.string().min(1).optional(),
     availability: z.nativeEnum(TourGuideAvailability).optional(),
-    avatarUrl: z.string().min(1).optional(),
   })
   .strict();
 
@@ -38,7 +58,6 @@ export const updateTourGuideSchema = z
     pricePerDay: z.number().nonnegative().optional(),
     currency: z.string().min(1).optional(),
     availability: z.nativeEnum(TourGuideAvailability).optional(),
-    avatarUrl: z.string().min(1).optional(),
   })
   .strict()
   .refine((data) => Object.keys(data).length > 0, {

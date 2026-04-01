@@ -28,6 +28,16 @@ export const createTourGuideBookingService = async (
     throw new Error('Tour guide is not available');
   }
 
+  const overlaps = await TourGuideBooking.exists({
+    tourGuide: data.tourGuide,
+    status: { $in: ['Pending', 'Confirmed'] },
+    startDate: { $lte: data.endDate },
+    endDate: { $gte: data.startDate },
+  });
+  if (overlaps) {
+    throw new Error('Tour guide is already booked for overlapping dates');
+  }
+
   const totalDays = calculateDays(data.startDate, data.endDate);
   const currency = data.currency ?? guide.currency ?? 'MMK';
   const pricePerDay = guide.pricePerDay;

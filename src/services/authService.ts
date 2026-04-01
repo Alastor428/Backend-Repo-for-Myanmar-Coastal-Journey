@@ -56,7 +56,11 @@ export const loginUserService = async (data: LogInType) => {
   if (!user || !(await bcrypt.compare(data.password, user.password))) {
     throw new Error('Invalid Credentials');
   }
-  return user;
+  const safe = await User.findById(user._id)
+    .select('-password -confirmPassword -verifyToken -resetPassword')
+    .lean();
+  if (!safe) throw new Error('Invalid Credentials');
+  return safe;
 };
 
 export const getAllUsersService = async (page: number, limit: number) => {
